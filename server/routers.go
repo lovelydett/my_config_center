@@ -1,13 +1,27 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/gorilla/mux"
+)
 
 func StartServer() {
-	// http.Handle needs a http.Handler that implements the ServeHTTP method
-	// while http.HandleFunc needs a function that takes a http.ResponseWriter and a http.Request
+	// Use mux to support path params
+	router := mux.NewRouter()
 
-	// Router 1: the default static file router that catch any path
-	http.HandleFunc("/", staticFileHandler)
+	// TODO: split GET/POST/PUT/DELETE to different routers
+	router.HandleFunc("/files", addMiddleWares(uploadFileHandler, true))
+	router.HandleFunc("/filter-files", addMiddleWares(filterFilesHandler, true))
+	router.HandleFunc("/tag-file", addMiddleWares(tagFileHandler, true))
+	router.HandleFunc("/untag-file", addMiddleWares(untagFileHandler, true))
+	router.HandleFunc("/rename-file", addMiddleWares(renameFileHandler, true))
+	router.HandleFunc("/files/{file_id}", addMiddleWares(deleteFileHandler, true))
+
+	// The default static file router that catch any other path
+	router.HandleFunc("/", addMiddleWares(staticFileHandler, false))
+
+	http.Handle("/", router)
 
 	// Start the HTTP server
 	http.ListenAndServe("0.0.0.0:8080", nil)

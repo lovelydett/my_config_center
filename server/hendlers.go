@@ -5,6 +5,13 @@ import (
 	"strings"
 )
 
+type BaseHandler interface {
+	GET(w http.ResponseWriter, r *http.Request)
+	POST(w http.ResponseWriter, r *http.Request)
+	PUT(w http.ResponseWriter, r *http.Request)
+	DELETE(w http.ResponseWriter, r *http.Request)
+}
+
 func _checkMethod(w http.ResponseWriter, r *http.Request, method string) bool {
 	if r.Method != method {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

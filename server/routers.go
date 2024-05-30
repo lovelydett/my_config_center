@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -17,6 +18,15 @@ func StartServer() {
 	router.HandleFunc("/untag-file", addMiddleWares(untagFileHandler, true))
 	router.HandleFunc("/rename-file", addMiddleWares(renameFileHandler, true))
 	router.HandleFunc("/files/{file_id}", addMiddleWares(deleteFileHandler, true))
+
+	// Test router
+	router.HandleFunc("/test/{test_id}", addMiddleWares(func(w http.ResponseWriter, r *http.Request) {
+		// Get the path param
+		vars := mux.Vars(r)
+		testId := vars["test_id"]
+		fmt.Println("Test ID: ", testId)
+		w.Write([]byte("Test ID: " + testId))
+	}, true))
 
 	// The default static file router that catch any other path
 	router.HandleFunc("/", addMiddleWares(staticFileHandler, false))

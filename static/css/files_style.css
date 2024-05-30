@@ -1,0 +1,21 @@
+.file-list-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.file-list-table th,
+.file-list-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+.search-area {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.more-icon {
+  cursor: pointer;
+}
+.tag {
+  margin-right: 5px;
+  cursor: pointer;
+}

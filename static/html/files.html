@@ -3,56 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<<<<<<< HEAD
-    <title>File List Page</title>
-    <link href="files_style.css" type="text/css" rel="stylesheet" />
-  </head>
-  <body>
-    <header class="search-area">
-      <h1>File List</h1>
-      <div>
-        <select id="searchType">
-          <option value="file_type">File Type</option>
-          <option value="tag">Tag</option>
-          <option value="fileName">File Name</option>
-          <option value="fileNotes">File Notes</option>
-        </select>
-        <input type="text" id="queryString" placeholder="Search..." />
-        <!-- Hide the selection by default and display the input -->
-        <select id="searchSelection" disabled />
-        <button onclick="searchFiles()">Search</button>
-      </div>
-    </header>
-
-    <table class="file-list-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Upload Time</th>
-          <th>Notes</th>
-          <th>Tags</th>
-          <th>Operation</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- File metadata rows will go here -->
-      </tbody>
-    </table>
-
-    <script>
-      function searchFiles() {
-        // Implement search functionality
-      }
-
-      function showFullNotes(notes) {
-        // Implement showing full notes
-      }
-
-      function removeTag(tagId) {
-        // Implement tag removal
-      }
-    </script>
-=======
     <title>File List - Wolf</title>
     <link rel="stylesheet" href="/static/css/files.css" />
   </head>
@@ -152,6 +102,5 @@
       </div>
     </div>
     <script src="/static/js/files.js"></script>
->>>>>>> 741e203 (Greatly refactor the project structure and serve static files)
   </body>
 </html>

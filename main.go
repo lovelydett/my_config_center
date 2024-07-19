@@ -1,7 +1,14 @@
 package main
 
-import "my_config_center/server"
+import (
+	"log"
+	"net/http"
+)
 
 func main() {
-	server.StartServer()
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	router := initAppRouter()
+	http.Handle("/", router)
+	log.Println("Server started at http://localhost:8080")
+	http.ListenAndServe(":8080", nil)
 }

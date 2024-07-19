@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<<<<<<< HEAD
     <title>File List Page</title>
     <link href="files_style.css" type="text/css" rel="stylesheet" />
   </head>
@@ -51,5 +52,106 @@
         // Implement tag removal
       }
     </script>
+=======
+    <title>File List - Wolf</title>
+    <link rel="stylesheet" href="/static/css/files.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>File List</h1>
+      <div class="search-block">
+        <input type="text" id="search" placeholder="Search files..." />
+        <button id="searchButton">Search</button>
+      </div>
+      <div class="table-container">
+        <table id="fileTable">
+          <thead>
+            <tr>
+              <!-- &#9650; is a triangle -->
+              <th data-column="name" data-order="desc">Name &#9650;</th>
+              <th data-column="size" data-order="desc">Size &#9650;</th>
+              <th data-column="type" data-order="desc">Type &#9650;</th>
+              <th data-column="tags" data-order="desc">Tags &#9650;</th>
+              <th data-column="date" data-order="desc">Date &#9650;</th>
+              <th data-column="note" date-order="desc">Note &#9650;</th>
+            </tr>
+            <tr>
+              <th>
+                <input
+                  type="text"
+                  class="filter"
+                  data-column="name"
+                  placeholder="Filter by name"
+                />
+              </th>
+              <th>
+                <input
+                  type="text"
+                  class="filter"
+                  data-column="size"
+                  placeholder="Filter by size"
+                />
+              </th>
+              <th>
+                <input
+                  type="text"
+                  class="filter"
+                  data-column="type"
+                  placeholder="Filter by type"
+                />
+              </th>
+              <!-- The tags filter should be a pop-up instead of a text input -->
+              <th>
+                <div id="tagsFilterButton">
+                  <div id="tagsFilterPopup" , class="popup">
+                    <div class="popup-content">
+                      <span class="close">&times;</span>
+                      <h2>Tags Filter</h2>
+                      <div class="checkbox-group">
+                        <!-- Check boxes labels here -->
+                        <label>
+                          <input
+                            type="checkbox"
+                            ,
+                            class="filter-checkbox"
+                            value="option1"
+                          />Option 1</label
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </th>
+              <th>
+                <input
+                  type="text"
+                  class="filter"
+                  data-column="date"
+                  placeholder="Filter by date"
+                />
+              </th>
+              <th>
+                <input
+                  type="text"
+                  class="filter"
+                  data-column="note"
+                  placeholder="Search in note"
+                />
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows will be populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <button id="prevPage">Previous</button>
+        <span id="pageInfo">Page 1</span>
+        <button id="nextPage">Next</button>
+      </div>
+    </div>
+    <script src="/static/js/files.js"></script>
+>>>>>>> 741e203 (Greatly refactor the project structure and serve static files)
   </body>
 </html>

@@ -1,0 +1,132 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.search-block {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.search-block input {
+  width: 80%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+thead th {
+  cursor: pointer;
+  background: #f9f9f9;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+thead th:hover {
+  background: #eee;
+}
+
+tbody tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+tbody td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.filter {
+  width: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.pagination {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 10px 20px;
+  font-size: 16px;
+  margin: 0 5px;
+  border: none;
+  background: #007bff;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.pagination button:disabled {
+  background: #ccc;
+}
+
+.popup {
+  display: none;
+  position: absolute;
+  z-index: 1; /* ensure it sits above all elements */
+  top: 40px;
+  left: 0;
+  right: 0;
+  width: 200px;
+  background-color: rgba(0, 0, 0, 0.4); /* semi-transparent */
+}
+
+.popup-content {
+  background-color: #fff; /* White background for the modal content */
+  padding: 20px; /* Inner spacing */
+  border: 1px solid #888; /* Border around the modal */
+  border-radius: 8px; /* Rounded corners */
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.checkbox-group {
+  margin-bottom: 20px;
+}
+
+.checkbox-group label {
+  display: block;
+  margin: 10px 0;
+}

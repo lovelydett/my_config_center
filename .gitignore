@@ -22,3 +22,6 @@ go.work
 
 config/deploy_config.json
 data/
+
+# The executable
+wolf

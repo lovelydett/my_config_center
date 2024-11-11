@@ -16,5 +16,8 @@ COPY . .
 # Build the app
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o wolf .
 
+# Expose port
+EXPOSE 8889
+
 # Run the app
 CMD ["./wolf"]

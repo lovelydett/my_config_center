@@ -16,8 +16,13 @@ type MySqlConfig struct {
 	Database string `json:"database"`
 }
 
+type PgConfig struct {
+	Uri string `json:"uri"`
+}
+
 type DeployConfig struct {
 	MySQL MySqlConfig `json:"mysql"`
+	Pg    PgConfig    `json:"pg"`
 }
 
 var deployConfig DeployConfig

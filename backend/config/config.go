@@ -20,9 +20,17 @@ type PgConfig struct {
 	Uri string `json:"uri"`
 }
 
+type OSSConfig struct {
+	Region           string `json:"region"`
+	BucketName       string `json:"bucket"`
+	InternalEndpoint string `json:"internal_endpoint"`
+	ExternalEndpoint string `json:"external_endpoint"`
+}
+
 type DeployConfig struct {
 	MySQL MySqlConfig `json:"mysql"`
 	Pg    PgConfig    `json:"pg"`
+	OSS   OSSConfig   `json:"oss"`
 }
 
 var deployConfig DeployConfig

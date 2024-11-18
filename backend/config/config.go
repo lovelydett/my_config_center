@@ -27,10 +27,18 @@ type OSSConfig struct {
 	ExternalEndpoint string `json:"external_endpoint"`
 }
 
+type RedisConfig struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	Password string `json:"password" `
+	Database int    `json:"database"`
+}
+
 type DeployConfig struct {
 	MySQL MySqlConfig `json:"mysql"`
 	Pg    PgConfig    `json:"pg"`
 	OSS   OSSConfig   `json:"oss"`
+	Redis RedisConfig `json:"redis"`
 }
 
 var deployConfig DeployConfig

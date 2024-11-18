@@ -3,17 +3,33 @@ package files
 import (
 	"io"
 	"net/http"
-	"os"
 
+	"wolf/drivers"
 	"wolf/utils"
 )
+
+type FileChunk struct {
+	key   string
+	index int
+	total int
+	size  int
+	data  io.Reader
+}
+
+type ImurRequest struct {
+	bucket   string // Bucket name
+	key      string // Object name to upload
+	uploadID string // Generated UploadId
+}
+
+var oss = drivers.GetOSSConnector()
 
 func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// Parse the form data
 	r.ParseMultipartForm(10 << 20) // 10MB
 
 	// Get the file input stream
-	file, handler, err := r.FormFile("file")
+	file, _, err := r.FormFile("file")
 
 	if err != nil {
 		http.Error(w, "Invalid file", http.StatusBadRequest)
@@ -22,24 +38,12 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 
 	defer file.Close()
 
-	// Get other form data
-	tags := r.Form["tags"]
-	filename := r.FormValue("filename")
-	description := r.FormValue("description")
-
-	fileKey := utils.GetMD5Hash(handler.Filename)
-
-	// Save the file to the disk
-	dst, err := os.Create("./data/" + fileKey)
-	_, err = io.Copy(dst, file)
-	if err != nil {
-		http.Error(w, "Failed to save file", http.StatusInternalServerError)
-		return
+	chunk := FileChunk{
+		key:   r.FormValue("key"),
+		index: utils.Atoi(r.FormValue("index")),
+		total: utils.Atoi(r.FormValue("total")),
+		size:  utils.Atoi(r.FormValue("size")),
+		data:  file,
 	}
 
-	// Save the file meta data to the database
-	if err := insertFileMeta(filename, tags, description); err != nil {
-		http.Error(w, "Failed to save file", http.StatusInternalServerError)
-		return
-	}
 }

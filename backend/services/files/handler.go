@@ -4,10 +4,10 @@ import (
 	"net/http"
 )
 
-func UploadFileHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
-	}
+func UploadChunkHandler(w http.ResponseWriter, r *http.Request) {
 	uploadFile(w, r)
+}
+
+func MergeFileHanlder(w http.ResponseWriter, r *http.Request) {
+
 }

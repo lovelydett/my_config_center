@@ -23,7 +23,7 @@ func initAppRouter() *mux.Router {
 	})
 
 	// Add business handlers
-	router.HandleFunc("/files", files.UploadFileHandler).Methods("POST")
+	router.HandleFunc("/files/upload-chunk", files.UploadChunkHandler).Methods("POST")
 
 	return router
 }

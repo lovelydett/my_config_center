@@ -22,7 +22,7 @@ type ImurRequest struct {
 	uploadID string // Generated UploadId
 }
 
-var oss = drivers.GetOSSConnector()
+var oss = drivers.Bucket
 
 func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// Parse the form data

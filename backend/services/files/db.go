@@ -1,10 +1,13 @@
 package files
 
 import (
+	"context"
+	"time"
 	"wolf/drivers"
 )
 
-var db = drivers.GetPgConnector()
+var pg = drivers.Pg
+var redis = drivers.Redis
 
 func insertFileMeta(filename string, tags []string, description string) error {
 	params := map[string]interface{}{
@@ -12,23 +15,25 @@ func insertFileMeta(filename string, tags []string, description string) error {
 		"tags":        tags,
 		"description": description,
 	}
-	_, err := db.Conn.Exec("INSERT INTO files (filename, tags, description) VALUES (:filename, :tags, :description)", params)
+	_, err := pg.Exec("INSERT INTO files (filename, tags, description) VALUES (:filename, :tags, :description)", params)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func getImur(fileKey string) (string, error) {
-	var uploadId string
-	err := db.Conn.Get(&uploadId, "SELECT imur_upload_id FROM files WHERE md5=:key", map[string]interface{}{"key": fileKey})
-	if err != nil {
-		return "", err
+func initFileUpload(key string) bool {
+	val, _ := redis.SetNX(context.Background(), key, "inited", 10*time.Minute).Result()
+	if val {
+		return true
 	}
-	return uploadId, nil
+	return false
 }
 
-func getOrSetImur(fileKey string, uploadId string) (string, error) {
-	txId := db.BeginTx()
-
+func completeFileUploadInit(key string) error {
+	_, err := redis.Set(context.Background(), key, "wip", 10*time.Minute).Result()
+	if err != nil {
+		return err
+	}
+	return nil
 }

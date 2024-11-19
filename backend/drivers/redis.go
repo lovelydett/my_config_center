@@ -1,25 +1,32 @@
 package drivers
 
 import (
+	"context"
 	"strconv"
-	"sync"
+	"time"
 	"wolf/config"
 
 	"github.com/redis/go-redis/v9"
 )
 
-var rdb *redis.Client = nil
-var redisOnce sync.Once
+var Redis *redis.Client
 
-func GetRedisConnection() *redis.Client {
-	redisOnce.Do(func() {
-		conf := config.GetDeployConfig().Redis
-		rdb = redis.NewClient(&redis.Options{
-			Addr:     conf.Host + strconv.Itoa(conf.Port),
-			Password: conf.Password,
-			DB:       conf.Database,
-		})
+func init() {
+	conf := config.GetDeployConfig().Redis
+	Redis = redis.NewClient(&redis.Options{
+		Addr:     conf.Host + ":" + strconv.Itoa(conf.Port),
+		Password: conf.Password,
+		DB:       conf.Database,
 	})
 
-	return rdb
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	_, err := Redis.Ping(ctx).Result()
+	if err != nil {
+		if err == context.DeadlineExceeded || err == context.Canceled {
+			panic("Ping redis time out")
+		}
+		panic("Error ping redis")
+	}
 }

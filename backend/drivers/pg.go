@@ -7,56 +7,31 @@
 package drivers
 
 import (
-	"database/sql"
-	"log"
-	"sync"
+	"context"
 	"time"
 	"wolf/config"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
-type PgConnector struct {
-	Conn         *sqlx.DB
-	transactions map[string]*sql.Tx
-}
+var Pg *sqlx.DB
 
-var pgOnce = sync.Once{}
-var connector = PgConnector{Conn: nil}
+func init() {
+	deployConfig := config.GetDeployConfig()
+	Pg = sqlx.MustConnect("postgres", deployConfig.Pg.Uri)
 
-func GetPgConnector() *PgConnector {
-	pgOnce.Do(func() {
-		deployConfig := config.GetDeployConfig()
-		conn := sqlx.MustConnect("postgres", deployConfig.Pg.Uri)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
 
-		err := conn.Ping()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		conn.SetMaxOpenConns(25)
-		conn.SetMaxIdleConns(25)
-		conn.SetConnMaxLifetime(5 * time.Minute) // Refresh connections periodically
-
-		connector.Conn = conn
-	})
-
-	return &connector
-}
-
-// Implement the transaction semantics, converts it to a more flexible handle-based manipuliation
-func (pg PgConnector) BeginTx() string {
-	id := uuid.New().String()
-	tx, err := pg.Conn.Begin()
+	err := Pg.PingContext(ctx)
 	if err != nil {
-		log.Fatal(err)
+		if err == context.Canceled || err == context.DeadlineExceeded {
+			panic("Ping Postgres time out")
+		}
+		panic("Failed to ping postgres")
 	}
 
-	pg.transactions[id] = tx
-	return id
-}
-
-func (pg PgConnector) CommitTx(txId string) {
-
+	Pg.SetMaxOpenConns(25)
+	Pg.SetMaxIdleConns(25)
+	Pg.SetConnMaxLifetime(5 * time.Minute) // Refresh connections periodically
 }

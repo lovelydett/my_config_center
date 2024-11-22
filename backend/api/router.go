@@ -1,14 +1,14 @@
-package main
+package api
 
 import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-
-	"wolf/services/files"
 )
 
-func initAppRouter() *mux.Router {
+var router *mux.Router
+
+func init() {
 	// Use mux to support path params
 	router := mux.NewRouter()
 
@@ -23,7 +23,9 @@ func initAppRouter() *mux.Router {
 	})
 
 	// Add business handlers
-	router.HandleFunc("/files/upload-chunk", files.UploadChunkHandler).Methods("POST")
+	router.HandleFunc("/files/upload-chunk", uploadChunkHandler).Methods("POST")
+}
 
+func GetRouter() *mux.Router {
 	return router
 }

@@ -1,4 +1,4 @@
-package files
+package db
 
 import (
 	"context"
@@ -13,7 +13,7 @@ var pg = drivers.Pg
 var redis = drivers.Redis
 var bucket = drivers.Bucket
 
-func insertChunkMeta(filename string, tags []string, description string) error {
+func InsertChunkMeta(filename string, tags []string, description string) error {
 	params := map[string]interface{}{
 		"filename":    filename,
 		"tags":        tags,
@@ -26,7 +26,7 @@ func insertChunkMeta(filename string, tags []string, description string) error {
 	return nil
 }
 
-func initChunkUpload(key string) bool {
+func InitChunkUpload(key string) bool {
 	val, _ := redis.SetNX(context.Background(), key, "inited", time.Minute).Result()
 	if val {
 		return true
@@ -34,7 +34,7 @@ func initChunkUpload(key string) bool {
 	return false
 }
 
-func updateChunkUploadImur(key string, objectId string) error {
+func UpdateChunkUploadImur(key string, objectId string) error {
 	_, err := redis.Set(context.Background(), key, objectId, time.Minute).Result()
 	if err != nil {
 		return err
@@ -42,7 +42,7 @@ func updateChunkUploadImur(key string, objectId string) error {
 	return nil
 }
 
-func initChunkUploadImur(key string) (string, error) {
+func InitChunkUploadImur(key string) (string, error) {
 	res, err := bucket.InitiateMultipartUpload(key)
 	if err != nil {
 		return "", err
@@ -50,7 +50,7 @@ func initChunkUploadImur(key string) (string, error) {
 	return res.UploadID, nil
 }
 
-func getChunkUploadImur(key string) (string, error) {
+func GetChunkUploadImur(key string) (string, error) {
 	objectId, err := redis.GetEx(context.Background(), key, time.Minute).Result()
 	if err != nil {
 		return "", err
@@ -58,7 +58,7 @@ func getChunkUploadImur(key string) (string, error) {
 	return objectId, nil
 }
 
-func uploadFileChunk(chunk io.Reader, objectId string, size int64, index int) error {
+func UploadFileChunk(chunk io.Reader, objectId string, size int64, index int) error {
 	imur := oss.InitiateMultipartUploadResult{
 		UploadID: objectId,
 	}

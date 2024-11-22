@@ -1,4 +1,4 @@
-package files
+package services
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"wolf/db"
 	"wolf/utils"
 )
 
@@ -17,7 +18,7 @@ type Chunk struct {
 	data  io.Reader
 }
 
-func parseChunk(r *http.Request) (Chunk, error) {
+func ParseChunk(r *http.Request) (Chunk, error) {
 	r.ParseMultipartForm(10 << 20) // 10M
 	data, _, err := r.FormFile("chunk")
 	if err != nil {
@@ -32,19 +33,19 @@ func parseChunk(r *http.Request) (Chunk, error) {
 	}, nil
 }
 
-func uploadChunk(chunk Chunk) error {
+func UploadChunk(chunk Chunk) error {
 	var objectId string
 	var err error
 
 	// Step1: Try the distributed lock
-	if initChunkUpload(chunk.key) {
+	if db.InitChunkUpload(chunk.key) {
 		// Got the lock, responsible for registering the task
-		objectId, err = initChunkUploadImur(chunk.key)
+		objectId, err = db.InitChunkUploadImur(chunk.key)
 		if err != nil {
 			return err
 		}
 		// Update the task status
-		err = updateChunkUploadImur(chunk.key, objectId)
+		err = db.UpdateChunkUploadImur(chunk.key, objectId)
 		if err != nil {
 			return err
 		}
@@ -54,7 +55,7 @@ func uploadChunk(chunk Chunk) error {
 	retry := 0
 	for retry < 3 {
 		// Try to get the task status
-		objectId, err = getChunkUploadImur(chunk.key)
+		objectId, err = db.GetChunkUploadImur(chunk.key)
 		if err != nil {
 			return err
 		}
@@ -71,7 +72,7 @@ func uploadChunk(chunk Chunk) error {
 	}
 
 	// Step2: Upload the file chunk
-	err = uploadFileChunk(chunk.data, objectId, int64(chunk.size), chunk.index)
+	err = db.UploadFileChunk(chunk.data, objectId, int64(chunk.size), chunk.index)
 	if err != nil {
 		return err
 	}

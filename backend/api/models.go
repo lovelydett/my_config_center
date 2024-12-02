@@ -1,6 +1,6 @@
 // Define some data models
 
-package services
+package api
 
 type FileMeta struct {
 	FileId   string `json:"file_id"`

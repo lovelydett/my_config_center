@@ -34,18 +34,28 @@ func ParseChunk(r *http.Request) (Chunk, error) {
 }
 
 func UploadChunk(chunk Chunk) error {
-	var objectId string
+	// Currently only support upload to OSS
+	return uploadChunkToOSS(chunk)
+}
+
+func MergeChunks(key string) error {
+	// Currently only support merge the file chunks in OSS
+	return mergeChunksInOSS(key)
+}
+
+func uploadChunkToOSS(chunk Chunk) error {
+	var uploadId string
 	var err error
 
 	// Step1: Try the distributed lock
 	if db.InitChunkUpload(chunk.key) {
 		// Got the lock, responsible for registering the task
-		objectId, err = db.InitChunkUploadImur(chunk.key)
+		uploadId, err = db.InitChunkUploadImur(chunk.key)
 		if err != nil {
 			return err
 		}
 		// Update the task status
-		err = db.UpdateChunkUploadImur(chunk.key, objectId)
+		err = db.UpdateChunkUploadImur(chunk.key, uploadId)
 		if err != nil {
 			return err
 		}
@@ -55,11 +65,11 @@ func UploadChunk(chunk Chunk) error {
 	retry := 0
 	for retry < 3 {
 		// Try to get the task status
-		objectId, err = db.GetChunkUploadImur(chunk.key)
+		uploadId, err = db.GetChunkUploadImur(chunk.key)
 		if err != nil {
 			return err
 		}
-		if objectId != "" && objectId != "inited" {
+		if uploadId != "" && uploadId != "inited" {
 			break
 		}
 		// Sleep for a while
@@ -72,10 +82,19 @@ func UploadChunk(chunk Chunk) error {
 	}
 
 	// Step2: Upload the file chunk
-	err = db.UploadFileChunk(chunk.data, objectId, int64(chunk.size), chunk.index)
+	err = db.UploadFileChunk(chunk.data, uploadId, uploadId, int64(chunk.size), chunk.index)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func mergeChunksInOSS(key string) error {
+	uploadId, err := db.GetChunkUploadImur(key)
+	if err != nil {
+		return err
+	}
+
+	return db.CompleteChunkUploadToOSS(uploadId, key)
 }

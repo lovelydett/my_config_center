@@ -4,13 +4,16 @@ import (
 	"context"
 	"io"
 	"time"
+	"wolf/config"
 	"wolf/drivers"
+
+	"github.com/redis/go-redis/v9"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
 
 var pg = drivers.Pg
-var redis = drivers.Redis
+var rd = drivers.Redis
 var bucket = drivers.Bucket
 
 func InsertChunkMeta(filename string, tags []string, description string) error {
@@ -27,15 +30,12 @@ func InsertChunkMeta(filename string, tags []string, description string) error {
 }
 
 func InitChunkUpload(key string) bool {
-	val, _ := redis.SetNX(context.Background(), key, "inited", time.Minute).Result()
-	if val {
-		return true
-	}
-	return false
+	val, _ := rd.SetNX(context.Background(), key, "inited", time.Minute).Result()
+	return val
 }
 
-func UpdateChunkUploadImur(key string, objectId string) error {
-	_, err := redis.Set(context.Background(), key, objectId, time.Minute).Result()
+func UpdateChunkUploadImur(key string, uploadId string) error {
+	_, err := rd.Set(context.Background(), key, uploadId, time.Minute).Result()
 	if err != nil {
 		return err
 	}
@@ -51,17 +51,68 @@ func InitChunkUploadImur(key string) (string, error) {
 }
 
 func GetChunkUploadImur(key string) (string, error) {
-	objectId, err := redis.GetEx(context.Background(), key, time.Minute).Result()
+	uploadId, err := rd.GetEx(context.Background(), key, time.Minute).Result()
 	if err != nil {
 		return "", err
 	}
-	return objectId, nil
+	return uploadId, nil
 }
 
-func UploadFileChunk(chunk io.Reader, objectId string, size int64, index int) error {
+func UploadFileChunk(chunk io.Reader, key string, uploadId string, size int64, index int) error {
 	imur := oss.InitiateMultipartUploadResult{
-		UploadID: objectId,
+		Bucket:   config.GetDeployConfig().OSS.BucketName,
+		Key:      key,
+		UploadID: uploadId,
 	}
-	_, err := bucket.UploadPart(imur, chunk, size, index)
+	part, err := bucket.UploadPart(imur, chunk, size, index)
+	if err != nil {
+		return err
+	}
+
+	zsetKey := "zset_" + key
+
+	_, err = rd.ZAdd(context.TODO(), zsetKey, redis.Z{
+		Score:  float64(part.PartNumber),
+		Member: part.ETag,
+	}).Result()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = rd.Expire(context.TODO(), zsetKey, time.Minute).Result()
+
+	return err
+}
+
+func CompleteChunkUploadToOSS(uploadId string, key string) error {
+	// 1. Get all parts (etag + part number) from Redis
+	zsetKey := "zset_" + key
+	res, err := rd.ZRangeWithScores(context.TODO(), zsetKey, 0, -1).Result()
+
+	if err != nil {
+		return err
+	}
+
+	parts := make([]oss.UploadPart, 0)
+
+	for _, each := range res {
+		parts = append(parts, oss.UploadPart{
+			ETag:       each.Member.(string),
+			PartNumber: int(each.Score),
+		})
+	}
+
+	// 2. Compose a imur struct
+	imur := oss.InitiateMultipartUploadResult{
+		Bucket:   config.GetDeployConfig().OSS.BucketName,
+		Key:      key,
+		UploadID: uploadId,
+	}
+
+	// 3. Complete the merge task
+	objectAcl := oss.ObjectACL(oss.ACLPrivate)
+	_, err = bucket.CompleteMultipartUpload(imur, parts, objectAcl)
+
 	return err
 }

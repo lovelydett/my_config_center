@@ -85,13 +85,12 @@ func UploadFileChunk(chunk io.Reader, key string, uploadId string, size int64, i
 	return err
 }
 
-func CompleteChunkUploadToOSS(uploadId string, key string) error {
-	// 1. Get all parts (etag + part number) from Redis
+func GetUploadedParts(key string) ([]oss.UploadPart, error) {
 	zsetKey := "zset_" + key
 	res, err := rd.ZRangeWithScores(context.TODO(), zsetKey, 0, -1).Result()
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	parts := make([]oss.UploadPart, 0)
@@ -103,16 +102,18 @@ func CompleteChunkUploadToOSS(uploadId string, key string) error {
 		})
 	}
 
-	// 2. Compose a imur struct
+	return parts, nil
+}
+
+func CompleteChunkUploadToOSS(uploadId string, key string, parts []oss.UploadPart) error {
 	imur := oss.InitiateMultipartUploadResult{
 		Bucket:   config.GetDeployConfig().OSS.BucketName,
 		Key:      key,
 		UploadID: uploadId,
 	}
 
-	// 3. Complete the merge task
 	objectAcl := oss.ObjectACL(oss.ACLPrivate)
-	_, err = bucket.CompleteMultipartUpload(imur, parts, objectAcl)
+	_, err := bucket.CompleteMultipartUpload(imur, parts, objectAcl)
 
 	return err
 }

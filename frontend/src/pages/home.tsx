@@ -7,8 +7,6 @@ import {
     KeyOutlined,
 } from "@ant-design/icons";
 
-import type { FlexProps } from "antd";
-
 import Button from "../components/button";
 
 interface ButtonData {
@@ -33,6 +31,11 @@ const buttons: ButtonData[] = [
         title: "Passwords",
         path: "/passwords",
     },
+    {
+        icon: <BarsOutlined></BarsOutlined>,
+        title: "Experimental",
+        path: "/experimental",
+    }
 ];
 
 const boxStyle: CSSProperties = {

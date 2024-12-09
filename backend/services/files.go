@@ -91,10 +91,17 @@ func uploadChunkToOSS(chunk Chunk) error {
 }
 
 func mergeChunksInOSS(key string) error {
+	// 1. Get the upload ID
 	uploadId, err := db.GetChunkUploadImur(key)
 	if err != nil {
 		return err
 	}
 
-	return db.CompleteChunkUploadToOSS(uploadId, key)
+	// 2. Get the uploaded parts
+	parts, err := db.GetUploadedParts(key)
+	if err != nil {
+		return err
+	}
+
+	return db.CompleteChunkUploadToOSS(uploadId, key, parts)
 }

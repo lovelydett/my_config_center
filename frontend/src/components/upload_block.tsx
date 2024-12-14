@@ -2,11 +2,9 @@ import React from "react";
 
 import { UploadOutlined } from "@ant-design/icons";
 import { Button, message, Upload } from "antd";
-import type { UploadFile, UploadProps } from "antd/es/upload";
 import SparkMD5 from "spark-md5";
 
 interface UploadBlockState {
-    files: UploadFile[];
     uploading: boolean;
     progess: number; // [0, 1]
 }
@@ -54,7 +52,6 @@ class UploadBlock extends React.Component<{}, UploadBlockState> {
         super(props);
 
         this.state = {
-            files: [],
             uploading: false,
             progess: 0,
         };
@@ -117,7 +114,7 @@ class UploadBlock extends React.Component<{}, UploadBlockState> {
 
     render() {
         // Render current state
-        const { files, uploading } = this.state;
+        const { uploading } = this.state;
         return (
             <>
                 <Upload
